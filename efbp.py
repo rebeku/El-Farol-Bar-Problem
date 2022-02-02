@@ -35,16 +35,18 @@ def run_simulation(
     # record each agent's prediction on each iteration
     pred_history = np.zeros((agents, len(hist)))
 
-    windows = np.vstack([
-        hist[t-memory-i: t-i]
-        for i in range(memory)
-    ])
-    
-    # each column is a memory window.
-    # the rightmost column is the most recent
-    windows = np.vstack([windows, np.ones(shape=(1, memory), dtype=int)])
-
     while t < memory * 2 + n_iter:
+        
+        # construct time windows for evaluating strategies
+        windows = np.vstack([
+            hist[t-memory-i: t-i]
+            for i in range(memory)
+        ])
+        
+        # each column is a memory window.
+        # the rightmost column is the most recent
+        windows = np.vstack([windows, np.ones(shape=(1, memory), dtype=int)])
+        
         for agent in range(agents):
             strat = strats[agent]
             # each row is a strategy
@@ -59,7 +61,7 @@ def run_simulation(
             pred = strat[best_strat].dot(windows[:,-1])
             pred_history[agent, t] = pred
 
-        hist[t] = (pred_history[:, t] > threshold).sum()
+        hist[t] = (pred_history[:, t] < threshold).sum()
         t += 1
         
-    return hist, best_strats, pred_history 
+    return hist, best_strats, pred_history
