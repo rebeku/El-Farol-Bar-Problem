@@ -6,13 +6,23 @@ def make_strategies(rng, strategies, memory):
 
 
 def run_simulation(
-    agents = 100,
-    threshold = 60,
-    strategies = 10,
+    agents = 100, # number of agents
+    threshold = 60, # threshold for attendance
+    strategies = 10, # number of strategies
+    # number of weeks back in predictor function
+    # AND number of weeks back to look when selecting a predictor
     memory = 8,
-    n_iter = 200,
+    # number of rounds to run the simulation
+    n_iter = 500,
+    # random seed for numpy
     seed=23
 ):
+    """
+    Run a simulation of the El Farol Bar Problem
+    for *n_iter* weeks.  Return the weekly attendance history,
+    the strategy chosen by each agent, and the prediction
+    made by each agent each week using their optimal predictor.
+    """
     rng = np.random.default_rng(seed)
 
     # each row is a strategy
@@ -23,13 +33,18 @@ def run_simulation(
     start = rng.uniform(agents, size=(memory*2))
 
     # weekly attendance count
+    # the first 2*memory weeks are randomly generated
+    # to seed the strategies
     hist = np.hstack([start, np.zeros(n_iter)]).astype(int)
 
     # index of week
     # we need some starting history to begin making selections
     t = memory * 2
 
-    # record choice of strategy on each iteration
+    # Record the index of the optimal strategy 
+    # on each iteration.
+    # each row corresponds to an agent
+    # each column corresponds to a week
     best_strats = np.zeros((agents, len(hist)))
 
     # record each agent's prediction on each iteration
@@ -43,8 +58,8 @@ def run_simulation(
             for i in range(memory)
         ])
         
-        # each column is a memory window.
-        # the rightmost column is the most recent
+        # Each column contains the memory window for a particular week.
+        # The rightmost column is the most recent.
         windows = np.vstack([windows, np.ones(shape=(1, memory), dtype=int)])
         
         for agent in range(agents):
