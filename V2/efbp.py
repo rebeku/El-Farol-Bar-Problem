@@ -33,7 +33,7 @@ def run_simulation(
 
     # each row is a strategy
     strats = [
-        make_strategies(rng, strategies, memory + 1) for _ in range(agents)
+        make_strategies(rng, strategies, memory) for _ in range(agents)
     ]
 
     start = rng.uniform(agents, size=(memory*2))
@@ -59,22 +59,46 @@ def run_simulation(
     while t < memory * 2 + n_iter:
         
         # construct time windows for evaluating strategies
+        
+        # The columns begin at
+        # t - m - 1 
+        # t - m
+        # ...
+        # t - 1
+        # t
+        # as you go down the column you are looking back
+        # to that week's history.
+        # so the column beginning at *t - m - 1*
+        # generates the prediction for week *t - m*
+        # and the rightmost column generates a
+        # prediction for next week.
         windows = np.vstack([
-            hist[t-memory-i: t-i]
+            hist[t-memory-i-1: t-i]
             for i in range(memory)
         ])
-        
-        # Each column contains the memory window for a particular week.
-        # The rightmost column is the most recent.
-        windows = np.vstack([windows, np.ones(shape=(1, memory), dtype=int)])
-        
+
         for agent in range(agents):
             strat = strats[agent]
             # each row is a strategy
-            # each column is the predicted attendance for week t-i
+            # each column is predicted attendance
+            # in increasing order.
+            # the last column has the prediction for
+            # next week
             predictions = strat.dot(windows)
-            observations = windows[0, :]
-            errs = np.abs(predictions - observations).sum(axis=1)
+            
+            # these are the observations that we use to
+            # to test our predictions.
+            # note that the observation from column 0
+            # is not used since its prediction would come
+            # from a previous week's history.
+            observations = windows[0, 1:]
+
+            # calculate the absolute error of predictions
+            # here, we discard the rightmost prediction as
+            # this is the prediction for the future.
+            # if we knew the correct answer for that,
+            # we wouldn't need to predict it!
+            errs = np.abs(predictions[:, :-1] - observations).sum(axis=1)
 
             best_strat = np.argmin(errs)
             best_strats[agent, t] = best_strat
