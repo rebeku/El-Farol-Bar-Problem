@@ -2,13 +2,14 @@ import numpy as np
 
 
 def make_strategies(rng, strategies, memory):
-    # weights associated with each strategy for each week of memory
-    w = rng.uniform(-1, 1, size=(strategies, memory))
-
-    # scale each row to sum to 1
-    # this implies that predictions will be centered
-    # around mean of memory window
-    return 1/w.sum(axis=1).reshape((strategies,1)) * w
+    # weights should sum to 1
+    # essentially, we are partitioning the [0,1] interval
+    # and taking the size of each sub-interval
+    # TODO: add negative weights?
+    w = rng.uniform(size=(strategies, memory-1))
+    w.sort(axis=1)
+    offsets = np.hstack([w[:, :], np.ones(shape=(strategies,1))])
+    return offsets - np.hstack([np.zeros(shape=(strategies,1)), w[:, :]])
 
 
 def run_simulation(
