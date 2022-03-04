@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def make_strategies(rng, strategies, memory):
+def make_unbiased_strategies(rng, strategies, memory):
     # weights should sum to 1
     # essentially, we are partitioning the [0,1] interval
     # and taking the size of each sub-interval
@@ -10,6 +10,10 @@ def make_strategies(rng, strategies, memory):
     w.sort(axis=1)
     offsets = np.hstack([w[:, :], np.ones(shape=(strategies,1))])
     return offsets - np.hstack([np.zeros(shape=(strategies,1)), w[:, :]])
+
+
+def make_uniform_strategies(rng, strategies, memory):
+    return rng.uniform(-1,1, size=(strategies, memory))
 
 
 def run_simulation(
@@ -21,6 +25,8 @@ def run_simulation(
     memory = 8,
     # number of rounds to run the simulation
     n_iter = 500,
+    # current options are "unbiased", "uniform"
+    distribution="unbiased",
     # random seed for numpy
     seed=23
 ):
@@ -33,10 +39,17 @@ def run_simulation(
     rng = np.random.default_rng(seed)
 
     # each row is a strategy
+    
+    if distribution=="unbiased":
+        strategy_func =  make_unbiased_strategies
+    elif distribution=="uniform":
+        strategy_func = make_uniform_strategies
+        
     strats = [
-        make_strategies(rng, strategies, memory) for _ in range(agents)
+        strategy_func(rng, strategies, memory) for _ in range(agents)
     ]
 
+    
     start = rng.uniform(agents, size=(memory*2))
 
     # weekly attendance count
@@ -66,7 +79,6 @@ def run_simulation(
         # t - m
         # ...
         # t - 1
-        # t
         # as you go down the column you are looking back
         # to that week's history.
         # so the column beginning at *t - m - 1*
@@ -110,4 +122,4 @@ def run_simulation(
         hist[t] = (pred_history[:, t] < threshold).sum()
         t += 1
         
-    return hist, best_strats, pred_history
+    return hist[2*memory:], best_strats[:, 2*memory:], pred_history[:, 2*memory:]
