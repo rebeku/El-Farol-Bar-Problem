@@ -64,3 +64,51 @@ def summarize_run(**kwargs):
     
     if cl:
         print(hist[-cl:])
+        
+        
+def err(hist, a):
+    [c_4, c_3, c_2, c_1] = hist
+    return (c_3 - c_1 + (c_2 - c_3) * a)**2 + (c_4 - c_2 + (c_3 - c_4) * a)**2
+
+
+def pred(hist, a):
+    [c_4, c_3, c_2, c_1] = hist
+    return a * c_1 + (1 - a) * c_2
+
+
+def plot_errs(hist):
+    x = np.arange(-1, 1.01, 0.01)
+    y = err(hist, x)
+    going = pred(hist, x)
+
+    mask = np.where(going < 60)
+    plt.plot(x[mask],y[mask], color="blue")
+
+    mask = np.where(going >= 60)
+    plt.plot(x[mask],y[mask], color="orange")
+
+    plt.xlabel("a")
+    plt.ylabel("Error")
+    plt.legend(["going", "not going"])
+    _ = plt.title(hist)
+    
+    
+def binom_p_value(k, n, p):
+    if k < n * p:
+        return binom.cdf(k, n, p)
+    else:
+        return binom.sf(k, n, p)
+    
+    
+
+def assert_equal(a, b, msg):
+    assert (np.abs(a - b) < 1e-6).all(), msg
+    
+
+def assert_less(a, b, msg):
+    assert (a - b < 1e-6).all(), msg
+
+    
+def assert_geq(a,b,msg):
+    assert (a - b > -1e-6).all(), msg
+    
