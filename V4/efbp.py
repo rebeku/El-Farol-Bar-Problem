@@ -16,6 +16,8 @@ def make_uniform_strategies(rng, strategies, memory):
     return rng.uniform(-1,1, size=(strategies, memory))
 
 
+
+
 def run_simulation(
     agents = 100, # number of agents
     threshold = 60, # threshold for attendance
@@ -27,6 +29,8 @@ def run_simulation(
     n_iter = 500,
     # current options are "unbiased", "uniform"
     distribution="unbiased",
+    # alternately, caller may pass a new strategy function
+    strategy_func=None,
     # random seed for numpy
     seed=23
 ):
@@ -39,11 +43,11 @@ def run_simulation(
     rng = np.random.default_rng(seed)
 
     # each row is a strategy
-    
-    if distribution=="unbiased":
-        strategy_func =  make_unbiased_strategies
-    elif distribution=="uniform":
-        strategy_func = make_uniform_strategies
+    if not strategy_func:
+        if distribution=="unbiased":
+            strategy_func =  make_unbiased_strategies
+        elif distribution=="uniform":
+            strategy_func = make_uniform_strategies
         
     strats = [
         strategy_func(rng, strategies, memory) for _ in range(agents)
@@ -122,4 +126,4 @@ def run_simulation(
         hist[t] = (pred_history[:, t] < threshold).sum()
         t += 1
         
-    return hist[2*memory:], best_strats[:, 2*memory:], pred_history[:, 2*memory:]
+    return hist[2*memory:], best_strats[:, 2*memory:], pred_history[:, 2*memory:], strats
