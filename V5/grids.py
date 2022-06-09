@@ -1,3 +1,10 @@
+"""
+Generate data for grid plots.
+
+Sample command:
+python grids.py --smin 62 --smax 74 --mmin 2 --mmax 102 
+"""
+
 
 import numpy as np
 import pandas as pd
