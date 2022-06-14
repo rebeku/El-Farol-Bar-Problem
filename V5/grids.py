@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     does_not_cross = []
 
-    for i,j,k in product(s_range, m_range, iter_range):
+    for k,i,j in product(iter_range, s_range, m_range):
 
         s = strategies[i,j]
         m = memory[i,j]
@@ -106,4 +106,4 @@ if __name__ == "__main__":
         std = (sim.hist[-end_window:]).std()
 
         with open(writefile, "a", encoding="utf-8") as f:
-            f.write(f"{s},{m},{threshold*agents},uniform,{crosses},{std}\n")
+            f.write(f"{s},{m},{threshold*agents},uniform,{args.cf},{crosses},{std}\n")
