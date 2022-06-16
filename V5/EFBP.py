@@ -32,7 +32,7 @@ def make_centered_strategies(rng, strategies, memory):
 
 
 def pick_optimal_choices(rng,predictions,observations,threshold,strategies):
-    # how often does each predictor match the desired ooutcome?
+    # how often does each predictor match the desired outcome?
     performances = np.tile(observations < threshold, (strategies, 1)) == (predictions[:, :-1] < threshold)
     
     # add noise to randomize tie breaker

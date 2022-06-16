@@ -93,10 +93,13 @@ if __name__ == "__main__":
             seed=rng.choice(100000)
         )
 
-        end_window = max(m * 2, 50)
+        if (sim.hist[-3:] == sim.hist[-6:-3]).all():
+            end_window = 6
+        else:
+            end_window = max(m * 2, 50)
 
         # does it cross the threshold within the memory window?
-        under_t = (sim.hist[-end_window:] < threshold).sum()
+        under_t = (sim.hist[-end_window:] < threshold * agents).sum()
         crosses =  (under_t > 0 and under_t < end_window)
 
         cycle = detect_cycle(sim.hist, m)
