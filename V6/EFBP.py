@@ -133,10 +133,13 @@ class EFBPSim:
             # stop the simulation if it reaches a stable cycle
             # it seems like these are generally of period 3 so just
             # look for those
+            """
             if best_strat_func==minimize_squared_error and t >= 2*memory + 6:
                 if (hist[t-2:t+1] == hist[t-5:t-2]).all():
                     hist = hist[:t+1]
                     break
+            """
+
             t += 1
     
         self.t = t
