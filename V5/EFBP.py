@@ -59,6 +59,8 @@ class EFBPSim:
         best_strat_func=minimize_squared_error,
         # starting history
         start=None,
+        # file to write attendance history as it is generated
+        writefile=None,
         # random seed for numpy
         seed=23
     ):
@@ -139,19 +141,23 @@ class EFBPSim:
                 pred_history[agent, t] = pred
 
             hist[t] = (pred_history[:, t] < threshold).sum()
+            if writefile:
+                with open(writefile, "a") as f:
+                    f.write(str(hist[t]) + ",")
             
             # stop the simulation if it reaches a stable cycle
             # it seems like these are generally of period 3 so just
             # look for those
-            if t >= 2*memory + 6:
+            if best_strat_func==minimize_squared_error and t >= 2*memory + 6:
                 if (hist[t-2:t+1] == hist[t-5:t-2]).all():
                     hist = hist[:t+1]
                     break
             t += 1
     
-        self.hist = hist[2*memory:]
-        self.best_strats = best_strats[:, 2*memory:]
-        self.pred_history = pred_history[:, 2*memory:]
+        self.t = t
+        self.hist = hist[2*memory:t]
+        self.best_strats = best_strats[:, 2*memory:t]
+        self.pred_history = pred_history[:, 2*memory:t]
         self.strats = strats
         
     def first_a(self):
